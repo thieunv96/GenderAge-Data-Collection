@@ -1,0 +1,75 @@
+# Copyright (c) 2019 Abhishek Thakur(@abhiTronix) <abhi.una12@gmail.com>
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+image: Visual Studio 2019
+
+environment:
+  matrix:
+    - PYTHON: "C:\\Python37-x64"
+      PYTHON_VERSION: "3.7.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python38-x64"
+      PYTHON_VERSION: "3.8.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python39-x64"
+      PYTHON_VERSION: "3.9.x"
+      PYTHON_ARCH: "64"
+
+    - PYTHON: "C:\\Python310-x64"
+      PYTHON_VERSION: "3.10.x"
+      PYTHON_ARCH: "64"
+
+build: off
+
+version: "{branch}-{build}"
+
+cache:
+  - '%LOCALAPPDATA%\pip\Cache'
+
+branches:
+  only:
+    - testing
+
+skip_commits:
+  files:
+    - "**/*.md"
+    - "**/*.html"
+    - "**/*.js"
+    - "**/*.css"
+    - docs/**/*
+    - mkdocs.yml
+    - README.md
+
+matrix:
+  fast_finish: true
+
+install:
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "python --version"
+  - "python -m pip install --upgrade pip wheel"
+  - "python -m pip install .[asyncio] six codecov httpx pytest-cov pytest-asyncio yt_dlp aiortc paramiko m3u8 async-asgi-testclient"
+  - "python -m pip install --upgrade deffcode"
+  - "python -m pip install cryptography==38.0.4"
+  - "python -m pip install https://github.com/abhiTronix/python-mpegdash/releases/download/0.3.0-dev2/mpegdash-0.3.0.dev2-py3-none-any.whl"
+  - cmd: chmod +x scripts/bash/prepare_dataset.sh
+  - cmd: bash scripts/bash/prepare_dataset.sh
+
+test_script:
+  - cmd: python -m pytest --verbose --capture=no --cov-report term-missing --cov=vidgear vidgear/tests/
+
+
+after_test:
+  - cmd: python -m codecov
