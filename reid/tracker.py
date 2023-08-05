@@ -1,5 +1,5 @@
 import sys
-sys.path.append('tracking')
+sys.path.append('reid')
 import numpy as np
 from pytracker.pytracker import DistanceTracker 
 import time
